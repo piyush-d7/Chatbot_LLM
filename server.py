@@ -36,36 +36,30 @@ def generate(request: GenerateRequest):
     import time
     start_time = time.time()
     
-    # Tokenize input
     inputs = tokenizer(request.prompt, return_tensors="pt").to(model.device)
     input_length = inputs.input_ids.shape[1]
     
     print(f"Input length: {input_length}")
-    print(f"Input tokens: {inputs.input_ids}")
+    print(f"Generating...")
     
-    # Generate response
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
-            max_new_tokens=request.max_tokens,
-            temperature=request.temperature,
-            do_sample=True,
-            pad_token_id=tokenizer.eos_token_id
+            max_new_tokens=min(request.max_tokens, 100),  # Limit to 100 for speed
+            temperature=0.7,  # Fixed temperature
+            do_sample=False,  # Greedy decoding = faster
+            pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
+            eos_token_id=tokenizer.eos_token_id
         )
     
-    print(f"Output shape: {outputs.shape}")
-    print(f"Output tokens: {outputs[0]}")
+    print(f"Generation complete")
     
-    # Extract only generated tokens
     generated_ids = outputs[0][input_length:]
-    print(f"Generated tokens only: {generated_ids}")
-    print(f"Generated tokens length: {len(generated_ids)}")
-    
-    # Decode
     response_text = tokenizer.decode(generated_ids, skip_special_tokens=True)
-    print(f"Decoded text: '{response_text}'")
     
     processing_time = time.time() - start_time
+    print(f"Processing time: {processing_time:.2f}s")
+    print(f"Generated text: {response_text[:100]}...")
     
     return GenerateResponse(
         generated_text=response_text,
