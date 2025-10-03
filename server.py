@@ -7,7 +7,7 @@ import uvicorn
 app = FastAPI(title="LLM Inference Service")
 
 # Load model on startup
-MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+MODEL_NAME = "Qwen/Qwen2-0.5B-Instruct"
 print("Loading model...")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 model = AutoModelForCausalLM.from_pretrained(
