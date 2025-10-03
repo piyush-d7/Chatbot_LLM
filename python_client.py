@@ -7,7 +7,7 @@ openai_api_base = "http://5660157692410416.us-east-1.pai-eas.aliyuncs.com/api/pr
 client = OpenAI(
     api_key=openai_api_key,
     base_url=openai_api_base,
-)
+) 
 
 models = client.models.list()
 model = models.data[0].id
