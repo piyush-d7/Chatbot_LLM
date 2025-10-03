@@ -8,8 +8,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # PRE-DOWNLOAD MODEL DURING BUILD (this is the key change)
 RUN python -c "from transformers import AutoModelForCausalLM, AutoTokenizer; \
-    AutoTokenizer.from_pretrained('TinyLlama/TinyLlama-1.1B-Chat-v1.0'); \
-    AutoModelForCausalLM.from_pretrained('TinyLlama/TinyLlama-1.1B-Chat-v1.0')"
+    AutoTokenizer.from_pretrained('Qwen/Qwen2-0.5B-Instruct'); \
+    AutoModelForCausalLM.from_pretrained('Qwen/Qwen2-0.5B-Instruct')"
 
 # Copy server code
 COPY server.py .
