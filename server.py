@@ -45,11 +45,18 @@ def generate(request: GenerateRequest):
             **inputs,
             max_new_tokens=request.max_tokens,
             temperature=request.temperature,
-            do_sample=True
+            do_sample=True,
+            pad_token_id=tokenizer.eos_token_id
         )
     
-    # Decode output
-    response_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    # Get input length to extract only new tokens
+    input_length = inputs.input_ids.shape[1]
+    
+    # Extract only generated tokens
+    generated_ids = outputs[0][input_length:]
+    
+    # Decode only the generated part
+    response_text = tokenizer.decode(generated_ids, skip_special_tokens=True)
     
     processing_time = time.time() - start_time
     
