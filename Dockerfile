@@ -33,7 +33,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # PRE-DOWNLOAD with vLLM (not transformers)
 RUN python -c "from huggingface_hub import snapshot_download; \
-    snapshot_download('Qwen/Qwen1.5-1.8B-Chat', \
+    snapshot_download('Qwen/Qwen2.5-7B-Instruct', \
     local_files_only=False, \
     resume_download=True)"
 
