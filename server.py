@@ -67,7 +67,9 @@ from typing import List, Dict
 app = FastAPI(title="LLM Inference Service")
 
 # Load model with vLLM
-MODEL_NAME = "Qwen/Qwen1.5-1.8B-Chat"
+# MODEL_NAME = "Qwen/Qwen1.5-1.8B-Chat"
+MODEL_NAME = "Qwen/Qwen2.5-7B-Instruct"
+
 print("Loading model with vLLM...")
 llm = LLM(
     model=MODEL_NAME,
@@ -157,7 +159,7 @@ def chat(request: ChatRequest):
         temperature=request.temperature,
         max_tokens=request.max_tokens,
         top_p=0.95,
-        repetition_penalty=1.1,
+        repetition_penalty=1.05,
         stop=["<|im_end|>", "<|endoftext|>"]  # Stop tokens for Qwen
     )
     
