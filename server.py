@@ -77,6 +77,7 @@ llm = LLM(
     trust_remote_code=True,
     gpu_memory_utilization=0.90,
     dtype="float16",
+    quantization="gptq",
     max_model_len=4096
 )
 print("Model loaded successfully")
