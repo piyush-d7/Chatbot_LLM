@@ -2,14 +2,20 @@
 
 # WORKDIR /app
 
+# # Install system dependencies
+# RUN apt-get update && apt-get install -y \
+#     git \
+#     && rm -rf /var/lib/apt/lists/*
+
 # # Copy requirements
 # COPY requirements.txt .
 # RUN pip install --no-cache-dir -r requirements.txt
 
-# # PRE-DOWNLOAD MODEL DURING BUILD (this is the key change)
-# RUN python -c "from transformers import AutoModelForCausalLM, AutoTokenizer; \
-#     AutoTokenizer.from_pretrained('Qwen/Qwen1.5-1.8B-Chat'); \
-#     AutoModelForCausalLM.from_pretrained('Qwen/Qwen1.5-1.8B-Chat')"
+# # PRE-DOWNLOAD with vLLM (not transformers)
+# RUN python -c "from huggingface_hub import snapshot_download; \
+#     snapshot_download('Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4', \
+#     local_files_only=False, \
+#     resume_download=True)"
 
 # # Copy server code
 # COPY server.py .
@@ -22,22 +28,36 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Minimal dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean \
+    && apt-get autoremove -y
 
-# Copy requirements
+# Optimized requirements installation
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir \
+    fastapi \
+    uvicorn[standard] \
+    vllm \
+    pydantic \
+    && pip cache purge \
+    && rm -rf /root/.cache/pip \
+    && find /usr/local/lib/python3.11 -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 
-# PRE-DOWNLOAD with vLLM (not transformers)
+# Download model with minimal files
 RUN python -c "from huggingface_hub import snapshot_download; \
-    snapshot_download('Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4', \
-    local_files_only=False, \
-    resume_download=True)"
+    snapshot_download( \
+        'Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4', \
+        cache_dir='/root/.cache/huggingface', \
+        ignore_patterns=['*.md', '*.txt', '*.pdf', 'LICENSE*', 'README*', '*.gitattributes'] \
+    )" \
+    && find /root/.cache/huggingface -name "*.md" -delete \
+    && find /root/.cache/huggingface -name "*.txt" -delete \
+    && find /root/.cache/huggingface -name "*.pdf" -delete
 
-# Copy server code
+# Copy server
 COPY server.py .
 
 EXPOSE 8000
