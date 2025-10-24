@@ -68,7 +68,8 @@ app = FastAPI(title="LLM Inference Service")
 
 # Load model with vLLM
 # MODEL_NAME = "Qwen/Qwen1.5-1.8B-Chat"
-MODEL_NAME = "Qwen/Qwen2.5-7B-Instruct"
+# MODEL_NAME = "Qwen/Qwen2.5-7B-Instruct"
+MODEL_NAME = "Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4"
 
 print("Loading model with vLLM...")
 llm = LLM(
