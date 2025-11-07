@@ -1,62 +1,45 @@
-# from fastapi import FastAPI
-# from pydantic import BaseModel
-# from vllm import LLM, SamplingParams
-# import time
+"""
+=============================================================================
+LLM INFERENCE SERVICE - VLLM-POWERED TEXT GENERATION
+=============================================================================
 
-# app = FastAPI(title="LLM Inference Service")
+PURPOSE:
+High-performance LLM inference using vLLM optimization framework. Generates
+chatbot responses 10-20x faster than standard transformers library.
 
-# # Load model with vLLM
-# # MODEL_NAME = "Qwen/Qwen2-0.5B-Instruct"
-# # MODEL_NAME = "TheBloke/Llama-3-8B-Instruct-GPTQ"
-# MODEL_NAME = "Qwen/Qwen1.5-1.8B-Chat"
-# print("Loading model with vLLM...")
-# llm = LLM(
-#     model=MODEL_NAME,
-#     trust_remote_code=True,
-#     gpu_memory_utilization=0.90,  # Reduced slightly for safety
-#     # quantization="gptq",  # CRITICAL: Tell vLLM this is a GPTQ model
-#     dtype="float16",
-#     max_model_len=4096
-# )
-# print("Model loaded successfully")
+MODEL:
+- Qwen2.5-7B-Instruct-GPTQ-Int4 (4-bit quantization)
+- Context: 4096 tokens
+- Response time: 2-5 seconds
+- Memory: ~4-5GB GPU RAM
 
-# class GenerateRequest(BaseModel):
-#     prompt: str
-#     max_tokens: int = 512
-#     temperature: float = 0.7
+HOW IT WORKS:
+1. Loads quantized Qwen model with vLLM optimizations on startup
+2. POST /chat: OpenAI-compatible chat completion API
+3. Formats messages into Qwen template: <|im_start|>role\ncontent<|im_end|>
+4. Returns generated response with processing time
 
-# class GenerateResponse(BaseModel):
-#     generated_text: str
-#     processing_time: float
+ENDPOINTS:
+- POST /chat: Primary endpoint for RAG pipeline (chat format)
+- POST /generate: Legacy endpoint (raw prompt)
+- GET /health: Health check for monitoring
 
-# @app.get("/health")
-# def health_check():
-#     return {"status": "healthy", "model": MODEL_NAME}
+VLLM BENEFITS:
+- PagedAttention for 50% memory reduction
+- Continuous batching for optimal GPU utilization
+- GPTQ quantization: 4x smaller, 3-4x faster inference
 
-# @app.post("/generate", response_model=GenerateResponse)
-# def generate(request: GenerateRequest):
-#     start_time = time.time()
-    
-#     sampling_params = SamplingParams(
-#         temperature=request.temperature,
-#         max_tokens=request.max_tokens,
-#         top_p=0.95,
-#         repetition_penalty=1.1
-#     )
-    
-#     outputs = llm.generate([request.prompt], sampling_params)
-#     generated_text = outputs[0].outputs[0].text
-    
-#     processing_time = time.time() - start_time
-    
-#     return GenerateResponse(
-#         generated_text=generated_text,
-#         processing_time=processing_time
-#     )
+INTEGRATION:
+ai_service.py → POST /chat → Returns RAG response
+Special command: "__SHOW_LEAD_FORM__" triggers lead capture
 
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8000)
+DEPLOYMENT:
+- Alibaba Cloud PAI-EAS with GPU instance (T4/A10)
+- Docker container with pre-downloaded model weights
+- Auto-scaling based on request queue
+
+=============================================================================
+"""
 
 from fastapi import FastAPI
 from pydantic import BaseModel
